@@ -9,5 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface textFieldView : UIViewController
+- (IBAction)sendMessage:(id)sender;
 
+@property (strong, nonatomic) IBOutlet UITextField *textField;
 @end

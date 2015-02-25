@@ -7,7 +7,7 @@
 //
 
 #import "AddImageToGroup.h"
-
+#import <dispatch/dispatch.h>
 @interface AddImageToGroup ()
 
 @end
@@ -17,6 +17,9 @@
 NSString * username;
 NSData *imageData;
 BOOL Switch;
+dispatch_queue_t queue;
+
+NSString *topicHolder;
 
 }
 #pragma mark  - IMAGE STUFF
@@ -29,12 +32,23 @@ BOOL Switch;
     //input code here
     
     //post method and send username and photo
-    imageData = UIImageJPEGRepresentation(self.imageView.image, 90);
+    imageData = UIImageJPEGRepresentation(self.imageView.image, 60);
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults synchronize];
     
+        [picker dismissViewControllerAnimated:YES completion:NULL];
     
-    [picker dismissViewControllerAnimated:YES completion:NULL];
+    queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
+    dispatch_sync(queue, ^{
+        
+        [self AFPost];
+    });
+    
+  
+    
+        //[self createGroup];
+    //[self createGroup];
     
 }
 
@@ -47,13 +61,28 @@ BOOL Switch;
 {
     
     
+    //self.Finished.alpha = 0;
+    //self.Finished.userInteractionEnabled = NO;
     Switch = true;
     
+    for (NSString *phone in self.addedMembers) {
+        NSLog(@"%@",phone);
+    }
+    topicHolder = self.topic;
+    
+    self.imageView.layer.cornerRadius = self.imageView.frame.size.width/2;
+    self.imageView.layer.masksToBounds = YES;
+    self.imageView.image = [UIImage imageNamed:@"greenBubbleLogo.png"];
+    
+    imageData = UIImageJPEGRepresentation(self.imageView.image, 90);
+    
     NSLog(@"Topic Train choo choo mutha fucka:%@",self.topic);
+    self.topicLabel.text = self.topic;
     // self.image = [[UIImageView alloc]init];
     [super viewDidLoad];
     
     username = [[NSString alloc]init];
+    username = [[NSUserDefaults standardUserDefaults] objectForKey:@"username"];
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         
         UIAlertView *myAlertView = [[UIAlertView alloc] initWithTitle:@"Error"
@@ -63,6 +92,8 @@ BOOL Switch;
                                                     otherButtonTitles: nil];
         
         [myAlertView show];
+        
+        
         
     }
     /*self.picker = [[UIImagePickerController alloc] init];
@@ -78,13 +109,44 @@ BOOL Switch;
     
     
     
+    [self postTest];
     
+    
+    
+    [NSTimer scheduledTimerWithTimeInterval:1.0
+                                     target:self
+                                   selector:@selector(addMembersToGroup)
+                                   userInfo:nil
+                                    repeats:NO];
+
+    //[self addMembersToGroup];
+
+    
+    //[self addMembersToGroup];
+    queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
+    
+    dispatch_sync(queue, ^{
+       
+                
+    });
+    
+    dispatch_sync(queue, ^{
+        
+        
+        [NSTimer scheduledTimerWithTimeInterval:2.0
+                                         target:self
+                                       selector:@selector(AFPost)
+                                       userInfo:nil
+                                        repeats:NO];
+    });
     
     // Do any additional setup after loading the view.
 }
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
     //[self performSelector:@selector(showcamera) withObject:nil afterDelay:0.3];
+    self.topicLabel.text=[self.topic stringByReplacingOccurrencesOfString:@"_" withString:@" "];
 }
 - (void)didReceiveMemoryWarning
 {
@@ -99,12 +161,19 @@ BOOL Switch;
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([[segue identifier] isEqualToString:@"GroupCreated"])
     {
-        
+       // [self createGroup];
         
         //[self postTest];
 
         //[self AFPost];
         
+        
+        queue  = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_sync(queue, ^{
+            
+         //           [self addMembersToGroup];
+
+        });
         
     }
 }
@@ -112,9 +181,13 @@ BOOL Switch;
 
 -(void)postTest{
     
+    
     NSLog(@"Train stops here : %@",self.topic);
     
-    NSString *post = [NSString stringWithFormat:@"&topic=%@",[self.topic stringByReplacingOccurrencesOfString:@" " withString:@"_"]];
+    
+    queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);
+    dispatch_async(queue, ^{
+    NSString *post = [NSString stringWithFormat:@"&topic=%@&username=%@",[self.topic stringByReplacingOccurrencesOfString:@" " withString:@"_"],username];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
@@ -130,17 +203,13 @@ BOOL Switch;
     } else {
         NSLog(@"Connection could not be made");
     }
-}
-- (IBAction)Submit:(id)sender {
-    if (Switch) {
+    });
         
-    [self postTest];
-    [self AFPost];
-    
-    }
-    Switch = true;
-    
+        
+        
 }
+
+
 
 -(void)AFPost{
 
@@ -162,8 +231,12 @@ BOOL Switch;
         [op start];
         
     }}
-    
 
+-(void)createGroup{
+    [self postTest];
+    [self addMembersToGroup];
+    [self AFPost];
+}
 
 
 
@@ -204,6 +277,8 @@ BOOL Switch;
  // Pass the selected object to the new view controller.
  }
  */
+
+
 - (IBAction)GalleryButton:(id)sender {
     
     
@@ -225,4 +300,66 @@ BOOL Switch;
     
     [self presentViewController:picker animated:YES completion:NULL];
 }
+-(void)addMembersToGroup{
+    
+    
+    for (NSString *phoneNumber in self.addedMembers) {
+        
+        NSLog(@"self.topic ==%@",self.topic);
+        
+       /* NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/addMembersToGroup.php?phoneNumber=%@&topic=%@",phoneNumber,self.topic];
+        NSData *dataURL = [NSData dataWithContentsOfURL:[NSURL URLWithString:strURL]];
+        NSString *strResult = [[NSString alloc] initWithData:dataURL encoding:NSUTF8StringEncoding];
+        */
+       // NSLog(@"%@",strResult);
+        
+//        NSLog(@"phone::%@",phoneNumber);
+//        NSLog(@"TOPIC::%@",self.topic);
+//        //NSString *topico = [[NSString alloc ]initWithString: self.topic];
+//        
+//        NSString *post = [NSString stringWithFormat:@"&phoneNumber=%@&topic=%@",phoneNumber,self.topic];
+//        NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+//        NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
+//        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
+//            [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/addMembersToGroup.php"]]];
+//            [request setHTTPMethod:@"POST"];
+//            [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+//            [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+//            [request setHTTPBody:postData];
+//        NSURLConnection *conn = [[NSURLConnection alloc]initWithRequest:request delegate:self];
+//    
+//    if(conn) {
+//        NSLog(@"Connection Successful");
+//    } else {
+//        NSLog(@"Connection could not be made");
+//        }
+//    }
+        
+        NSString *post = [NSString stringWithFormat:@"&topic=%@&phoneNumber=%@",topicHolder,phoneNumber];
+        NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+        NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
+        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
+        [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/addMembersToGroup.php"]]];
+        [request setHTTPMethod:@"POST"];
+        [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
+        [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+        [request setHTTPBody:postData];
+        NSURLConnection *conn = [[NSURLConnection alloc]initWithRequest:request delegate:self];
+        
+        if(conn) {
+            NSLog(@"Connection Successful");
+        } else {
+            NSLog(@"Connection could not be made");
+        }
+
+    
+}
+
+
+}
+
+
+
+
+
 @end

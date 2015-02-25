@@ -7,7 +7,19 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "EmojiPictureChangeViewController.h"
 
 @interface EmojiRegistrationViewController : UIViewController
+@property (strong, nonatomic) IBOutlet UIImageView *happy;
+- (IBAction)happyButton:(id)sender;
+
+@property (strong, nonatomic) IBOutlet UIImageView *angelic;
+- (IBAction)angelButton:(id)sender;
+
+@property (strong, nonatomic) IBOutlet UIImageView *sleepy;
+
+- (IBAction)sleepyButton:(id)sender;
+
+
 
 @end

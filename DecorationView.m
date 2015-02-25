@@ -7,7 +7,15 @@
 //
 
 #import "DecorationView.h"
-
+@interface DecorationView()
+@property(weak) IBOutlet UIImageView *backgroundImageView;
+@property(weak) IBOutlet UILabel *searchLabel;
+@end
 @implementation DecorationView
 
+
+
+
+- (IBAction)add:(id)sender {
+}
 @end

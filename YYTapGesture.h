@@ -10,4 +10,6 @@
 
 @interface YYTapGesture : UITapGestureRecognizer
 
+
+@property int unit;
 @end
