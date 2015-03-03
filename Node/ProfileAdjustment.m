@@ -10,4 +10,13 @@
 
 @implementation ProfileAdjustment
 
+
+
+
+
+
+- (IBAction)buttonPressed:(id)sender {
+    [self setValue:self.phoneInputTextField.text forKey:@"phoneNumber" ];
+    
+}
 @end

@@ -8,7 +8,7 @@
 
 #import "registrationViewController.h"
 #import <dispatch/dispatch.h>
-
+#import "CoreDataAPI.h"
 @interface registrationViewController (){
     NSString *email;
     NSString *username;
@@ -51,9 +51,9 @@
     self.phoneVerifImage.layer.masksToBounds=self.usernameVerifImage.layer.masksToBounds=self.passwordVerifImage.layer.masksToBounds=self.confirmPasswordVerifImage.layer.masksToBounds=YES;
     
     // Do any additional setup after loading the view.
-    self.logo.layer.cornerRadius= self.logo.frame.size.width/2;
-    self.logo.layer.masksToBounds=YES;
-    self.usernameTextField.delegate=self.passwordTextField.delegate=self.passwordConfirmationTextField.delegate=self.phoneNumber.delegate=self.phoneNumber2.delegate=self.phoneNumber3.delegate=self;
+//    self.logo.layer.cornerRadius= self.logo.frame.size.width/2;
+//    self.logo.layer.masksToBounds=YES;
+//    self.usernameTextField.delegate=self.passwordTextField.delegate=self.passwordConfirmationTextField.delegate=self.phoneNumber.delegate=self.phoneNumber2.delegate=self.phoneNumber3.delegate=self;
     
     
     UIVisualEffect *blurEffect;
@@ -74,14 +74,14 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-    self.logo.layer.cornerRadius = self.logo.layer.frame.size.width/2;
-    self.logo.layer.masksToBounds=YES;
+//    self.logo.layer.cornerRadius = self.logo.layer.frame.size.width/2;
+//    self.logo.layer.masksToBounds=YES;
 }
 -(BOOL)postTest{
-    phoneNumber = [[self.phoneNumber.text stringByAppendingString:self.phoneNumber2.text] stringByAppendingString:self.phoneNumber3.text] ;
+//    phoneNumber = [[self.phoneNumber.text stringByAppendingString:self.phoneNumber2.text] stringByAppendingString:self.phoneNumber3.text] ;
+//    
     
-    
-    [self cleanThePhoneNumber];
+   // [self cleanThePhoneNumber];
     //email = _emailTextField.text;
     username = _usernameTextField.text;
     password = _passwordTextField.text;
@@ -93,15 +93,15 @@
         
         NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
         DeviceToken = [defaults objectForKey:@"DeviceToken"];
-    
-    NSLog(@"phone number : %@",_phoneNumber.text);
+        email = self.emailTextField.text;
+   // NSLog(@"phone number : %@",_phoneNumber.text);
     NSLog(@"email :%@",email);
     NSLog(@"username :%@",username);
     NSLog(@"password :%@",password);
     NSLog(@"passwordConfirmation :%@",passwordConfirmation);
     NSLog(@"Device Token");
-    NSString *post = [NSString stringWithFormat:@"&username=%@&password=%@&email=%@&phoneNumber=%@",username,password,email,[[self.phoneNumber.text stringByAppendingString:self.phoneNumber2.text] stringByAppendingString:self.phoneNumber3.text]];
-    NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
+    NSString *post = [NSString stringWithFormat:@"&username=%@&password=%@&email=%@",username,password,email];
+    NSData *postData = [post dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
     NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
     [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/registration.php"]]];
@@ -125,7 +125,7 @@
     else{
         UIAlertView *notPermitted = [[UIAlertView alloc]
                                      initWithTitle:@"Alert"
-                                     message:@"passwords don't match or you didn't format a phone number correctly"
+                                     message:@"passwords don't match "
                                      delegate:nil
                                      cancelButtonTitle:@"OK"
                                      otherButtonTitles:nil];
@@ -187,7 +187,7 @@
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
 }
-*/
+*//*
 -(void)verify:(NSString *)string{
     
     
@@ -321,6 +321,7 @@
     
     
 }
+*//*
 -(void)cleanThePhoneNumber{
     NSString *phoneNumber1 = [NSString stringWithFormat:[NSString stringWithFormat:@"%@",_phoneNumber.text]];
     phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@"(" withString:@""];
@@ -334,10 +335,17 @@
     
     
 }
-
+*/
 - (IBAction)registrationButton:(id)sender {
     if([self postTest]){
-        [self performSegueWithIdentifier:@"ToLogin" sender:self];
+       NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        [defaults setObject:email forKey:@"email"];
+        [defaults setObject:username forKey:@"username"];
+        [defaults synchronize];
+        
+        [CoreDataAPI newProfileInformationWithUsername:username email:email userID:0 phoneNumber:nil profilePhoto:nil password:password];
+        [self performSegueWithIdentifier:@"welcome" sender:self];
+        
     }
 }
 @end

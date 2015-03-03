@@ -44,6 +44,28 @@
 
     [super viewDidLoad];
 
+    
+    NSLog(@"TOPIC:::%@",self.topic);
+    /* make the API call */
+    [FBRequestConnection startWithGraphPath:@"/me/friends"
+                                 parameters:nil
+                                 HTTPMethod:@"GET"
+                          completionHandler:^(
+                                              FBRequestConnection *connection,
+                                              id result,
+                                              NSError *error
+                                              ) {
+                              /* handle the result */
+                              
+                              NSLog(@"%@",result);
+                              
+                              
+                              
+                          }];
+    
+    
+    
+    
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -60,7 +82,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     // Return the number of rows in the section.
     //CFIndex numberOfPeople = ABAddressBookGetPersonCount(addressBook);
-    NSLog(@"count:%lu",(unsigned long)[MemberList count]);
+   // NSLog(@"count:%lu",(unsigned long)[MemberList count]);
     return  [MemberList count];
 
 }
@@ -70,7 +92,7 @@
     
     // Configure the cell...
     
-    static NSString *simpleTableIdentifier = @"Cell";
+    static NSString *simpleTableIdentifier = @"InvCell";
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
     
@@ -78,7 +100,7 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
     }
     
-   NSString* phone ;
+   NSString* email ;
 
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
@@ -87,7 +109,7 @@
     NSString *username;
     
     
-    phone = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"phoneNumber"];
+    email = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"email"];
     username= [[MemberList objectAtIndex:indexPath.row] objectForKey:@"username"];
     __block NSData *imageData;
     //Recipe *recipe = [recipes objectAtIndex:indexPath.row];
@@ -100,7 +122,7 @@
     
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_async(queue, ^{
-        imageData=[[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",phone]]];
+        imageData=[[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",email]]];
                    dispatch_sync(dispatch_get_main_queue(), ^{
                        dispatch_sync(queue, ^{
                            if (imageData) {
@@ -139,7 +161,7 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
 
-    NSString *phone = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"phoneNumber"];
+    NSString *phone = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"email"];
     //if (![listOfPhoneNumbers containsObject:phone]) {
        // if ([self postTest:phone]) {
     
@@ -157,12 +179,12 @@
     [selected setObject:number atIndexedSubscript:indexPath.row];
 }
     else{
-        [addedMembers removeObjectIdenticalTo:phone];
-        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-        UIImageView *addedImageView = (UIImageView *)[cell viewWithTag:10];
-        addedImageView.image = [UIImage imageNamed:@"addIn.png"];
-        NSString *number = @"0";
-        [selected setObject:number atIndexedSubscript:indexPath.row];
+//        [addedMembers removeObjectIdenticalTo:phone];
+//        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+//        UIImageView *addedImageView = (UIImageView *)[cell viewWithTag:10];
+//        addedImageView.image = [UIImage imageNamed:@"addIn.png"];
+//        NSString *number = @"0";
+//        [selected setObject:number atIndexedSubscript:indexPath.row];
         
         
     }
@@ -215,7 +237,7 @@
     
         NSString *verificationString =[strResult substringFromIndex: [strResult length] - 4];
     
-        NSLog(@"%@",verificationString);
+       // NSLog(@"%@",verificationString);
         if ([@"Pass" isEqualToString:verificationString]) {
             hold =  YES;
         }
@@ -280,7 +302,7 @@
         
         
         
-        [addedMembers addObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"phoneNumber"]];
+        [addedMembers addObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"email"]];
         AddImageToGroup *vc = [segue destinationViewController];
         //Fix this to go to the table view
         vc.topic = [NSString stringWithFormat:@"%@",self.topic];
@@ -308,7 +330,7 @@
 }//define variables to extract info from xml doc
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
     //search for tags
-    if ([element isEqualToString:@"phoneNumber"]) {
+    if ([element isEqualToString:@"email"]) {
         [memberNumberUpdate appendString:string];
         
     }
@@ -318,9 +340,9 @@
 }
 - (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
     if ([elementName isEqualToString:@"Members"]) {
-        NSLog(@"memberNumberUpdate::%@",memberNumberUpdate);
-        NSLog(@"usernameUpdate: %@",usernameUpdate);
-        [item setObject:memberNumberUpdate forKey:@"phoneNumber"];
+//        NSLog(@"memberNumberUpdate::%@",memberNumberUpdate);
+//        NSLog(@"usernameUpdate: %@",usernameUpdate);
+        [item setObject:memberNumberUpdate forKey:@"email"];
         [item setObject:usernameUpdate forKey:@"username"];
         [MemberList addObject:item];//The problem lies in add objects
         [selected addObject:@"0"];

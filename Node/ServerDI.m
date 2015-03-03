@@ -9,5 +9,8 @@
 #import "ServerDI.h"
 
 @implementation ServerDI
-
+//- (id)config
+//{
+////    return [TyphoonDefinition configDefinitionWithName:@"serverConfiguration.properties"];
+//}
 @end

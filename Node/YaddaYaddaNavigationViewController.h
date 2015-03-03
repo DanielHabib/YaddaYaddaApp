@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "BubbleTableViewController.h"
+#import "ChatRoomViewController.h"
 @interface YaddaYaddaNavigationViewController : UINavigationController
+
+
 
 @end

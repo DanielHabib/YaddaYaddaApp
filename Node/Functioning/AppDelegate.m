@@ -7,38 +7,49 @@
 //
 
 #import "AppDelegate.h"
+#import "BubbleTableViewController.h"
+#import "StartUpVC.h"
+#import "CoreDataAssembly.h"
+#import <Typhoon/Typhoon.h>
+#import "CoreDataAPI.h"
+//#import "AppDelegate+CoreData.h"
+@implementation AppDelegate{
 
-@implementation AppDelegate
+}
 
-
-
-
+- (BOOL)application:(UIApplication *)application
+            openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication
+         annotation:(id)annotation {
+    // attempt to extract a token from the url
+    return [FBAppCall handleOpenURL:url sourceApplication:sourceApplication];
+}
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
    	// Let the device know we want to receive push notifications
-    /*[[UIApplication sharedApplication] registerForRemoteNotificationTypes:
-     (UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound | UIRemoteNotificationTypeAlert)];
-    
-    // Override point for customization after application launch.
-    */
-    //NS if i need both
     [UIApplication sharedApplication].applicationIconBadgeNumber = 0;
      [[UIApplication sharedApplication] registerForRemoteNotifications];
     [[UIApplication sharedApplication] registerUserNotificationSettings:[UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert | UIUserNotificationTypeBadge  categories:nil]];
-    
-  
-    
-    
-    
-    return YES;
-    
-    
-    
+
     
     
 
-     }
-							
+    
+    
+    _managedObjectContext = [CoreDataAPI grabGlobalManagedObjectContext];
+
+    
+    //[self fetchProfileInfo];
+    
+    return YES;
+    
+}
+
+- (void)applicationDidBecomeActive:(UIApplication *)application {
+    
+    // Logs 'install' and 'app activate' App Events.
+    [FBAppEvents activateApp];
+}
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -54,11 +65,6 @@
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
@@ -82,13 +88,10 @@
     
     
 }
-
 - (void)application:(UIApplication*)application didFailToRegisterForRemoteNotificationsWithError:(NSError*)error
 {
     NSLog(@"Failed to get token, error: %@", error);
 }
-
-
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:    (NSDictionary *)userInfo {
     
@@ -99,10 +102,30 @@
     int badge_value;
     badge_value+=[[[userInfo objectForKey:@"aps"] objectForKey:@"badge"]intValue];
     NSLog(@"Totoal badge Value:%d",badge_value);
-    
+    if (badge_value>2) {
+        badge_value = 2;
+    }
     for (id key in userInfo) {
         NSLog(@"key: %@, value: %@", key, [userInfo objectForKey:key]);
     }
     [UIApplication sharedApplication].applicationIconBadgeNumber = badge_value;}
+
+
+
+#pragma Mark - Core Data Stack
+
+
+
+- (NSURL *)applicationDocumentsDirectory {
+    // The directory the application uses to store the Core Data store file. This code uses a directory named "com.Distinguished.qqef" in the application's documents directory.
+   // NSLog(@"%@",[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
+    return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+}
+
+@synthesize managedObjectContext = _managedObjectContext;
+@synthesize managedObjectModel = _managedObjectModel;
+@synthesize persistentStoreCoordinator = _persistentStoreCoordinator;
+
+
 
 @end

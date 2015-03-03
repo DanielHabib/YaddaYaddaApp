@@ -15,6 +15,9 @@
 @property (strong, nonatomic) IBOutlet UILabel *addToGroupLabel;
 @property (strong, nonatomic) IBOutlet UILabel *deleteGroupLabel;
 @property NSString *topic;
+
+
+@property int groupID;
 - (IBAction)leaveGroup:(id)sender;
 
 - (IBAction)editPicture:(id)sender;

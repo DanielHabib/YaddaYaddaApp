@@ -57,7 +57,7 @@
 -(void)runXMLParse{
     //runs the parse
     NSLog(@"topic at collection View:%@",self.topic);
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/commentPage.php?topic=%@&unit=%d",self.topic,self.unit]];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/commentPage.php?topic=%@&unit=%d&topicID=%d",self.topic,self.unit,self.groupID]];
     parser=[[NSXMLParser alloc] initWithContentsOfURL:url];
     [parser setDelegate:self];
     [parser setShouldResolveExternalEntities:NO];

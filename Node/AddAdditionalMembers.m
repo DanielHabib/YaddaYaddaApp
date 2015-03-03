@@ -24,7 +24,7 @@
     NSMutableDictionary *item;
     NSMutableArray *MemberList;
     NSString *element;
-    
+    NSString *email;
     NSMutableString *memberNumberUpdate;
     NSMutableString *usernameUpdate;
 }
@@ -36,6 +36,7 @@
     MemberList = [[NSMutableArray alloc]init];
     addedMembers = [[NSMutableArray alloc]init];
     selected = [[NSMutableArray alloc]init];
+    email = [[NSUserDefaults standardUserDefaults]objectForKey:@"email"];
     [self runXMLParse];
     [super viewDidLoad];
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -94,26 +95,7 @@
 //        
 //        
   });
-//    
-//    
-//    
-//    
-//    
-//    
-//    // Uncomment the following line to preserve selection between presentations.
-//    // self.clearsSelectionOnViewWillAppear = NO;
-//    
-//    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-//    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-//    //sleep(1);
-//
-//    
-//
-//    
-//    
-//    
-    
-    
+
     
     
     
@@ -123,6 +105,10 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+
+
+
 
 #pragma mark - Table view data source
 
@@ -156,17 +142,18 @@
     
     
     
-    NSString* phone ;
-    
+    __block NSString* phone ;
+    __block NSString *emailTemp;
+
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     
     
     
     NSString *username;
     
-    
     phone = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"phoneNumber"];
     username= [[MemberList objectAtIndex:indexPath.row] objectForKey:@"username"];
+    emailTemp = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"email"];
     __block NSData *imageData;
     //Recipe *recipe = [recipes objectAtIndex:indexPath.row];
     UIImageView *profileImageView = (UIImageView *)[cell viewWithTag:20];
@@ -174,11 +161,12 @@
     profileImageView.layer.masksToBounds=YES;
     profileImageView.image= [UIImage imageNamed:@"blueToPurpleGradient.png"];
     
-    
+        UIImageView *addedImageView = (UIImageView *)[cell viewWithTag:10];
+
     
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_async(queue, ^{
-        imageData=[[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",phone]]];
+        imageData=[[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",emailTemp]]];
         dispatch_sync(dispatch_get_main_queue(), ^{
             dispatch_sync(queue, ^{
                 if (imageData) {
@@ -191,21 +179,46 @@
         
         
         
+        
     });
+    __block BOOL alreadyAdded=false;
+
+    dispatch_async(queue, ^{
+        for (NSMutableDictionary*dict in self.memberList) {
+            
+            if ([[dict objectForKey:@"email"]isEqualToString:emailTemp]) {
+                alreadyAdded = true;
+            }
+            
+            
+        }
+        if (alreadyAdded) {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                addedImageView.image=[UIImage imageNamed:@"memberAdded"];
+
+            });
+
+        }
+        else{
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                 addedImageView.image = [UIImage imageNamed:@"addIn.png"];
+            });
+        }
+    });
+    
+    
     
     UILabel *NameLabel = (UILabel *)[cell viewWithTag:30];
     NameLabel.text = username;
     
-    
-    UIImageView *addedImageView = (UIImageView *)[cell viewWithTag:10];
-    
-    if ([[selected objectAtIndex:indexPath.row] isEqualToString:@"1"]) {
+    if (!alreadyAdded) {
+        if (![[selected objectAtIndex:indexPath.row] isEqualToString:@"1"]) {
         addedImageView.image=[UIImage imageNamed:@"memberAdded"];
+    
+        }
     }
-    else{
-        addedImageView.image = [UIImage imageNamed:@"addIn.png"];
-        
-    }
+    
+   
     
     
     cell.selectionStyle = UITableViewCellSelectionStyleNone;
@@ -218,28 +231,30 @@
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
 
-     NSString *phone = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"phoneNumber"];
+     //NSString *phone = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"phoneNumber"];
+    NSString *emailTemp = [[MemberList objectAtIndex:indexPath.row] objectForKey:@"email"];
+
     if ([[selected objectAtIndex:indexPath.row] isEqualToString:@"0"]) {
        
         
-        [addedMembers addObject:phone];
+        [addedMembers addObject:emailTemp];
         UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
         
         UIImageView *addedImageView = (UIImageView *)[cell viewWithTag:10];
         addedImageView.image = [UIImage imageNamed:@"memberAdded.png"];
         NSString *number = @"1";
         [selected setObject:number atIndexedSubscript:indexPath.row];
-        [self addMembersToGroup:phone];
+        [self addMembersToGroup:emailTemp];
 
     }
     else{
-        [addedMembers removeObjectIdenticalTo:phone];
-        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
-        UIImageView *addedImageView = (UIImageView *)[cell viewWithTag:10];
-        addedImageView.image = [UIImage imageNamed:@"addIn.png"];
-        NSString *number = @"0";
-        [selected setObject:number atIndexedSubscript:indexPath.row];
-        
+//        [addedMembers removeObjectIdenticalTo:email];
+//        UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+//        UIImageView *addedImageView = (UIImageView *)[cell viewWithTag:10];
+//        addedImageView.image = [UIImage imageNamed:@"addIn.png"];
+//        NSString *number = @"0";
+//        [selected setObject:number atIndexedSubscript:indexPath.row];
+//        
         
     }
     //}
@@ -276,27 +291,27 @@
  }
  */
 
+//
+//
+//-(NSString *)cleanThePhoneNumber:(NSString *)phoneNumber{
+//    NSString *phoneNumber1 = [NSString stringWithFormat:phoneNumber];
+//    
+//    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@" " withString:@""];
+//    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@"(" withString:@""];
+//    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@")" withString:@""];
+//    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@"-" withString:@""];
+//    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@" " withString:@""];
+//    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@"+1" withString:@""];
+//    
+//    return phoneNumber1;
+//}
 
 
--(NSString *)cleanThePhoneNumber:(NSString *)phoneNumber{
-    NSString *phoneNumber1 = [NSString stringWithFormat:phoneNumber];
+
+-(BOOL)postTest:(NSString *)email{
     
-    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@" " withString:@""];
-    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@"(" withString:@""];
-    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@")" withString:@""];
-    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@"-" withString:@""];
-    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@" " withString:@""];
-    phoneNumber1 = [phoneNumber1 stringByReplacingOccurrencesOfString:@"+1" withString:@""];
     
-    return phoneNumber1;
-}
-
-
-
--(BOOL)postTest:(NSString *)phoneNumber{
-    
-    
-    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/checkPhoneNumber.php?phoneNumber=%@",phoneNumber];
+    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/checkPhoneNumber.php?email=%@",email];
     NSData *dataURL = [NSData dataWithContentsOfURL:[NSURL URLWithString:strURL]];
     NSString *strResult = [[NSString alloc] initWithData:dataURL encoding:NSUTF8StringEncoding];
     
@@ -324,14 +339,13 @@
     return NO;
     
 }
--(void)addMembersToGroup:(NSString *)phoneNumber{
+-(void)addMembersToGroup:(NSString *)emailAddy{
     
     
     //for (NSString *phoneNumber in self.addedMembers) {
-        NSLog(@"phone::%@",phoneNumber);
         NSLog(@"TOPIC::%@",self.topic);
         
-        NSString *post = [NSString stringWithFormat:@"&phoneNumber=%@&topic=%@",phoneNumber,self.topic];
+        NSString *post = [NSString stringWithFormat:@"&email=%@&topic=%d&adderEmail=%@",emailAddy,self.groupID,email];
         NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
         NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
@@ -349,7 +363,15 @@
         }
     }
     
-
+-(void)runMemberCheckParse{
+    NSLog(@"GROUP ID PRIOR TO checking topic members:%d",self.groupID);
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topicMembers.php?topic=%d",self.groupID]];
+    parser=[[NSXMLParser alloc] initWithContentsOfURL:url];
+    [parser setDelegate:self];
+    [parser setShouldResolveExternalEntities:NO];
+    [parser parse];
+    
+}
 
 
 
@@ -361,6 +383,7 @@
     [parser setDelegate:self];
     [parser setShouldResolveExternalEntities:NO];
     [parser parse];
+    [self.tableView reloadData];
 }
 -(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict {
     element = elementName;
@@ -373,10 +396,11 @@
 }//define variables to extract info from xml doc
 - (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
     //search for tags
-    if ([element isEqualToString:@"phoneNumber"]) {
+    if ([element isEqualToString:@"email"]) {
         [memberNumberUpdate appendString:string];
         
     }
+    
     else if ([element isEqualToString:@"username"]){
         [usernameUpdate appendString:string];
     }
@@ -385,7 +409,7 @@
     if ([elementName isEqualToString:@"Members"]) {
         NSLog(@"memberNumberUpdate::%@",memberNumberUpdate);
         NSLog(@"usernameUpdate: %@",usernameUpdate);
-        [item setObject:memberNumberUpdate forKey:@"phoneNumber"];
+        [item setObject:memberNumberUpdate forKey:@"email"];
         [item setObject:usernameUpdate forKey:@"username"];
         [MemberList addObject:item];//The problem lies in add objects
         [selected addObject:@"0"];

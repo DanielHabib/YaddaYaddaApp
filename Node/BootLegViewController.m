@@ -5,7 +5,7 @@
 //  Created by Daniel Habib on 9/19/14.
 //  Copyright (c) 2014 d.g.habib7@gmail.com. All rights reserved.
 //
-
+#import <FacebookSDK/FacebookSDK.h>
 #import "BootLegViewController.h"
 
 @interface BootLegViewController (){
@@ -32,6 +32,11 @@
     
     
     
+ 
+    
+    
+
+    
     
     // Do any additional setup after loading the view.
 }
@@ -41,17 +46,47 @@
     
     
     NSLog(@"username is :%@",username);
-    if ([username isEqualToString:@""]){
-                [self performSegueWithIdentifier:@"startToLogin" sender:self];
-
-    }
-    else if (!username){
-        [self performSegueWithIdentifier:@"startToLogin" sender:self];
-    }
-    else{
+    
+    NSLog(@"bruh");
+    
+    if (FBSession.activeSession.isOpen)
+    {
         [self performSegueWithIdentifier:@"startToTableView" sender:self];
         [self postDeviceID];
+        NSLog(@"fbloginsuccess");
+        
+        // post to wall
+    } else {
+        NSLog(@"fblogin failed");
+        //@[@"public_profile", @"email", @"user_friends"]
+        // try to open session with existing valid token
+        NSArray *permissions = [[NSArray alloc] initWithObjects:
+                                @"public_profile", @"email", @"user_friends",
+                                nil];
+        FBSession *session = [[FBSession alloc] initWithPermissions:permissions];
+        [FBSession setActiveSession:session];
+        if([FBSession openActiveSessionWithAllowLoginUI:NO]) {
+            
+            [self performSegueWithIdentifier:@"startToTableView" sender:self];
+            [self postDeviceID];
+            
+            
+            
+        } else {
+            // you need to log the user
+        }
     }
+//    if ([username isEqualToString:@""]){
+//                [self performSegueWithIdentifier:@"startToLogin" sender:self];
+//
+//    }
+//    else if (!username){
+//        [self performSegueWithIdentifier:@"startToLogin" sender:self];
+//    }
+//    else{
+//        [self performSegueWithIdentifier:@"startToTableView" sender:self];
+//        [self postDeviceID];
+//    }
 
 }
 

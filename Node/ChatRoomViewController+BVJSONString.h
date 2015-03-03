@@ -9,5 +9,5 @@
 #import "ChatRoomViewController.h"
 
 @interface ChatRoomViewController (BVJSONString)
-
+-(NSString*) bv_jsonStringWithPrettyPrint:(BOOL) prettyPrint;
 @end

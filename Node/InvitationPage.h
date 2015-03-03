@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <AddressBook/ABAddressBook.h>
 #import <AddressBookUI/AddressBookUI.h>
+#import <FacebookSDK/FacebookSDK.h>
 @interface InvitationPage : UITableViewController<NSXMLParserDelegate>
 
 

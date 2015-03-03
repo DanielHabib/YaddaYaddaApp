@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "customizeGroup.h"
 #import <SpriteKit/SpriteKit.h>
-#import "textFieldView.h"
 #import "CommentPageTableViewController.h"
 #import <dispatch/dispatch.h>
 #import <AudioToolbox/AudioToolbox.h>

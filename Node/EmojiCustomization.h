@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface EmojiCustomization : UIViewController
+@interface EmojiCustomization : UIViewController<UINavigationControllerDelegate, UICollectionViewDataSource,UICollectionViewDelegate, UIImagePickerControllerDelegate>
+@property (strong, nonatomic) IBOutlet UICollectionView *collectionView;
+@property UIImagePickerController *picker;
+@property (strong, nonatomic) IBOutlet UILabel *HeaderLabel;
 
 @end

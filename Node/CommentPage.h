@@ -8,6 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CommentPage : UIViewController
+@interface CommentPage : UIViewController<UITableViewDataSource,UITableViewDelegate,NSXMLParserDelegate>
+
+@property (strong, nonatomic) IBOutlet UITableView *tableView;
+
+@property (strong, nonatomic) IBOutlet UILabel *mainPost;
+@property NSString *mainPostString;
+@property (nonatomic) NSString *topic;
+@property(nonatomic)int groupID;
+@property(nonatomic)  int unit;
+
 
 @end

@@ -7,7 +7,8 @@
 //
 
 #import "SettingsPage.h"
-
+#import "CoreDataAPI.h"
+#import <FacebookSDK/FacebookSDK.h>
 @interface SettingsPage ()
 
 @end
@@ -56,6 +57,11 @@
 
 - (IBAction)logOut:(id)sender {
     NSString *appDomain = [[NSBundle mainBundle] bundleIdentifier];
+    FBSession* session = [FBSession activeSession];
+    [session closeAndClearTokenInformation];
+    [session close];
+    [CoreDataAPI deleteAllObjectsInCoreData];
+    [FBSession setActiveSession:nil];
     [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:appDomain];
 }
 @end

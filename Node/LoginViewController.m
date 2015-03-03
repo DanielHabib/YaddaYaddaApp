@@ -9,10 +9,12 @@
 #import "LoginViewController.h"
 #import "BubbleTableViewController.h"
 #import <QuartzCore/QuartzCore.h>
+#import <FacebookSDK/FacebookSDK.h>
+#import "CoreDataAPI.h"
 
-
-@interface LoginViewController (){
+@interface LoginViewController () <FBLoginViewDelegate> {
     NSString *userName;
+    NSString *email;
     NSString *password;
     NSMutableString *phoneNumber;
     NSMutableString *phoneNumberUpdate;
@@ -30,8 +32,36 @@
 }
 
 
+// This method will be called when the user information has been fetched
+- (void)loginViewFetchedUserInfo:(FBLoginView *)loginView
+                            user:(id<FBGraphUser>)user {
+    
+    
+}
+
+
+// Logged-in user experience
+- (void)loginViewShowingLoggedInUser:(FBLoginView *)loginView {
+    NSLog(@"user officially loggedd in");
+
+    [self performSegueWithIdentifier:@"loginToTableView" sender:self];
+    
+}
+
+
+- (void)loginView:(FBLoginView *)loginView handleError:(NSError *)error {
+    // see https://developers.facebook.com/docs/reference/api/errors/ for general guidance on error handling for Facebook API
+    // our policy here is to let the login view handle errors, but to log the results
+    NSLog(@"FBLoginView encountered an error=%@", error);
+}
+
 - (void)viewDidLoad
 {
+    FBLoginView *loginView =     [[FBLoginView alloc] initWithReadPermissions:
+                                  @[@"public_profile", @"email", @"user_friends"]];
+    loginView.center = CGPointMake(self.view.center.x, self.view.center.y-loginView.frame.size.width/2);
+    loginView.delegate=self;
+    [self.view addSubview:loginView];
     
     self.logoSpot.layer.cornerRadius=self.logoSpot.frame.size.width/2;
     self.logoSpot.layer.masksToBounds = YES;
@@ -39,8 +69,7 @@
     queue= dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_async(queue, ^{
         
-        
-                NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     userName = [defaults objectForKey:@"username"];
     password = [defaults objectForKey:@"password"];
     [self runXMLParse];
@@ -62,14 +91,7 @@
     
     visualEffectView.frame = self.background.bounds;
     [self.background addSubview:visualEffectView];
-    
-    
-    
-    
-    
-    
-    
-    
+  
     
     [super viewDidLoad];
     // Do any additional setup after loading the view.
@@ -102,7 +124,7 @@
     
     userName = _usernameTextField.text;
     password = _passwordTextField.text;
-
+    email  = _usernameTextField.text;
     
     
 }
@@ -136,7 +158,8 @@
         }
     }
     
-    // by default perform the segue transition
+    [CoreDataAPI newProfileInformationWithUsername:userName email:email userID:0 phoneNumber:nil profilePhoto:nil password:password];
+
     return YES;
 }
 
@@ -168,7 +191,7 @@
     [defaults setObject:phoneNumber forKey:@"phoneNumber"];
     [defaults synchronize];
     
-    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/login.php?username=%@&password=%@",userName,password];
+    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/login.php?email=%@&password=%@",email,password];
     NSData *dataURL = [NSData dataWithContentsOfURL:[NSURL URLWithString:strURL]];
     NSString *strResult = [[NSString alloc] initWithData:dataURL encoding:NSUTF8StringEncoding];
     
@@ -187,6 +210,8 @@
     NSLog(@"%@",verificationString);
         
     if ([@"Pass" isEqualToString:verificationString]) {
+        [[NSUserDefaults standardUserDefaults]setObject:email forKey:@"email"];
+        [[NSUserDefaults standardUserDefaults]synchronize];
         return  YES;
     }
     }

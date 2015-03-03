@@ -10,4 +10,8 @@
 
 @interface CoreDataAPI (Delete)
 
+
+
++(void)deleteAllObjectsInCoreDataModel;
++(void)deleteGroupModelwithGroupID:(int)groupID;
 @end

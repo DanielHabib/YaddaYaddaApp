@@ -10,7 +10,7 @@
 
 @interface GroupCollectionViewCollectionViewController : UICollectionViewController<NSXMLParserDelegate>
 
-
+@property int groupID;
 @property NSString *topic;
 
 @end

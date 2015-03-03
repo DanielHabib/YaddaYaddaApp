@@ -9,5 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface UITextView (VerticalAlignment)
+- (void)alignToTop;
 
+/**
+ Client should call this to stop KVO.
+ */
+- (void)disableAlignment;
 @end

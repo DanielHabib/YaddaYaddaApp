@@ -9,6 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <AddressBook/ABAddressBook.h>
 #import <AddressBookUI/AddressBookUI.h>
-@interface AddAdditionalMembers : UITableViewController
+@interface AddAdditionalMembers : UITableViewController<NSXMLParserDelegate>
 @property NSString* topic;
+@property int groupID;
+@property NSMutableArray *memberList;
 @end

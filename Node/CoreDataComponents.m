@@ -10,4 +10,10 @@
 
 @implementation CoreDataComponents
 
+
+
+
+@synthesize managedObjectContext;
+@synthesize persistenStoreCoordinator;
+
 @end

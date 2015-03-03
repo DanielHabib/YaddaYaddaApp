@@ -7,8 +7,17 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <FacebookSDK/FacebookSDK.h>
+@interface BubbleTableViewController : UITableViewController <UITableViewDelegate, UITableViewDataSource, NSXMLParserDelegate,NSFetchedResultsControllerDelegate>
+{
 
-@interface BubbleTableViewController : UITableViewController <UITableViewDelegate, UITableViewDataSource>
+}
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
+@property(strong,nonatomic)NSArray *coreDataResultArray;
+
+
+
+
 @property (strong,nonatomic)NSString *userName;
 - (IBAction)sidebarMenu:(id)sender;
 

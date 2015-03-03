@@ -10,6 +10,7 @@
 
 @interface CommentPageTableViewController : UITableViewController<NSXMLParserDelegate>
 @property (nonatomic) NSString *topic;
+@property(nonatomic)int groupID;
 @property(nonatomic)  int unit;
 
 @end

@@ -15,6 +15,7 @@
 
 @implementation customizeGroup{
     NSData *imageData;
+    NSString *email;
     dispatch_queue_t queue;
 }
 
@@ -29,16 +30,18 @@
     self.greyBackground.layer.cornerRadius=self.greyBackground.frame.size.width/2;
     self.greyBackground.layer.masksToBounds=YES;
     
+    self.profileImageView.layer.cornerRadius=self.profileImageView.frame.size.width/2;
+    self.profileImageView.layer.masksToBounds=YES;
     
     // Do any additional setup after loading the view.
-    
+    email = [[NSUserDefaults standardUserDefaults] objectForKey:@"email"];
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 
     
-    self.profileImageView.image = [UIImage imageNamed:@"DeepMustacheTransparent.png"];
+    self.profileImageView.image = [UIImage imageNamed:@"grayBackground.png"];
     
     dispatch_async(queue, ^{
-            imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topics/%@/groupPic.jpg",self.topic]]];
+            imageData = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topics/%d/groupPic.jpg",self.groupID]]];
     
         dispatch_sync(dispatch_get_main_queue(), ^{
             
@@ -50,9 +53,12 @@
     
     });
 
- 
-    
-    
+    self.navigationItem.backBarButtonItem.tintColor = [UIColor grayColor];
+    self.navigationItem.backBarButtonItem.image = [UIImage imageNamed:@"btn_back.png"];
+    self.navigationItem.leftBarButtonItem.image = [UIImage imageNamed:@"btn_back.png"];
+    self.navigationItem.leftBarButtonItem.tintColor = [UIColor grayColor];
+    self.navigationItem.leftItemsSupplementBackButton = NO;
+    self.navigationItem.title = [_topic stringByReplacingOccurrencesOfString:@"_" withString:@" "];
     
     
 }
@@ -88,7 +94,7 @@
     if(imageData){
         NSLog(@"image Data exists");
         
-        AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topics/%@",self.topic]]];
+        AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topics/%d",self.groupID]]];
         manager.responseSerializer = [AFHTTPResponseSerializer serializer];
         //NSData *imageData = UIImageJPEGRepresentation(pickedImage, 0.5);
         NSDictionary *parameters = @{@"message": @"test"};
@@ -114,6 +120,7 @@
         
         GroupCollectionViewCollectionViewController *vc = [segue destinationViewController];
         vc.topic=[NSString stringWithFormat:@"%@",self.topic];
+        vc.groupID = self.groupID;
         //AddAdditionalMembers *vc = [segue destinationViewController];
         //Fix this to go to the table view
         //vc.topic = [NSString stringWithFormat:@"%@",self.topic];
@@ -128,22 +135,16 @@
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 - (IBAction)leaveGroup:(id)sender {
-    NSString *phone = [[NSUserDefaults standardUserDefaults] objectForKey:@"phoneNumber"];
     
+    email = [[NSUserDefaults standardUserDefaults]objectForKey:@"email"];
+    NSLog(@"Credentials");
+    NSLog(@"%d",self.groupID);
+    NSLog(@":%@",email);
     
-    
-    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/removeUserFromGroup.php?topic=%@&phone=%@",self.topic,phone];
+    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/removeUserFromGroup.php?topic=%d&email=%@",self.groupID,email];
     NSData *dataURL = [NSData dataWithContentsOfURL:[NSURL URLWithString:strURL]];
     NSString *strResult = [[NSString alloc] initWithData:dataURL encoding:NSUTF8StringEncoding];
     

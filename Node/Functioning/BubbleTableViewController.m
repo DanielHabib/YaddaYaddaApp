@@ -147,6 +147,8 @@
         [item setObject:topic forKey:@"topic"];
         [TopicList addObject:[topic copy]];//The problem lies in add objects
         
+        topic  = [[NSMutableString alloc] init];
+
     }}
 
 -(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

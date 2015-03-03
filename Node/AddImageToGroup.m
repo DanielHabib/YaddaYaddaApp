@@ -15,6 +15,7 @@
 @implementation AddImageToGroup{
 
 NSString * username;
+    NSString * email;
 NSData *imageData;
 BOOL Switch;
 dispatch_queue_t queue;
@@ -34,6 +35,7 @@ NSString *topicHolder;
     //post method and send username and photo
     imageData = UIImageJPEGRepresentation(self.imageView.image, 60);
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    email = [defaults objectForKey:@"email"];
     [defaults synchronize];
     
         [picker dismissViewControllerAnimated:YES completion:NULL];
@@ -54,7 +56,14 @@ NSString *topicHolder;
 
 
 
-
+-(void)setGroupIDCheck{
+    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/addMembersToGroupInitial.php?topic=%@&email=%@",topicHolder,email];
+    NSData *dataURL = [NSData dataWithContentsOfURL:[NSURL URLWithString:strURL]];
+    NSString *strResult = [[NSString alloc] initWithData:dataURL encoding:NSUTF8StringEncoding];
+    self.groupID=[strResult intValue];
+    
+    NSLog(@"Verification :%@",strResult);
+}
 
 
 - (void)viewDidLoad
@@ -72,15 +81,14 @@ NSString *topicHolder;
     
     self.imageView.layer.cornerRadius = self.imageView.frame.size.width/2;
     self.imageView.layer.masksToBounds = YES;
-    self.imageView.image = [UIImage imageNamed:@"greenBubbleLogo.png"];
+    self.imageView.image = [UIImage imageNamed:@"YY.png"];
     
     imageData = UIImageJPEGRepresentation(self.imageView.image, 90);
     
     NSLog(@"Topic Train choo choo mutha fucka:%@",self.topic);
-    self.topicLabel.text = self.topic;
     // self.image = [[UIImageView alloc]init];
     [super viewDidLoad];
-    
+    email = [[NSUserDefaults standardUserDefaults]objectForKey:@"email"];
     username = [[NSString alloc]init];
     username = [[NSUserDefaults standardUserDefaults] objectForKey:@"username"];
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
@@ -110,9 +118,9 @@ NSString *topicHolder;
     
     
     [self postTest];
+
     
-    
-    
+    [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(setGroupIDCheck) userInfo:nil repeats:NO];
     [NSTimer scheduledTimerWithTimeInterval:1.0
                                      target:self
                                    selector:@selector(addMembersToGroup)
@@ -187,7 +195,7 @@ NSString *topicHolder;
     
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT,0);
     dispatch_async(queue, ^{
-    NSString *post = [NSString stringWithFormat:@"&topic=%@&username=%@",[self.topic stringByReplacingOccurrencesOfString:@" " withString:@"_"],username];
+    NSString *post = [NSString stringWithFormat:@"&topic=%@&email=%@",[self.topic stringByReplacingOccurrencesOfString:@" " withString:@"_"],email];
     NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
     NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
@@ -210,13 +218,13 @@ NSString *topicHolder;
 }
 
 
-
+// Have to get groupID to post the image to that location
 -(void)AFPost{
-
+//pull topic ID is NECCESARY
     if(imageData){
         NSLog(@"image Data exists");
-        
-        AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topics/%@",self.topic]]];
+        NSLog(@"groupID PRIOR TO IMAGE CREATION:%d",self.groupID);
+        AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topics/%d",self.groupID]]];
         manager.responseSerializer = [AFHTTPResponseSerializer serializer];
         //NSData *imageData = UIImageJPEGRepresentation(pickedImage, 0.5);
         NSDictionary *parameters = @{@"message": @"test"};
@@ -303,39 +311,14 @@ NSString *topicHolder;
 -(void)addMembersToGroup{
     
     
-    for (NSString *phoneNumber in self.addedMembers) {
+    for (NSString *currentEmail in self.addedMembers) {
         
         NSLog(@"self.topic ==%@",self.topic);
         
-       /* NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/addMembersToGroup.php?phoneNumber=%@&topic=%@",phoneNumber,self.topic];
-        NSData *dataURL = [NSData dataWithContentsOfURL:[NSURL URLWithString:strURL]];
-        NSString *strResult = [[NSString alloc] initWithData:dataURL encoding:NSUTF8StringEncoding];
-        */
-       // NSLog(@"%@",strResult);
+        // Needs to be fixed later to handle mass
         
-//        NSLog(@"phone::%@",phoneNumber);
-//        NSLog(@"TOPIC::%@",self.topic);
-//        //NSString *topico = [[NSString alloc ]initWithString: self.topic];
-//        
-//        NSString *post = [NSString stringWithFormat:@"&phoneNumber=%@&topic=%@",phoneNumber,self.topic];
-//        NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
-//        NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
-//        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
-//            [request setURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/addMembersToGroup.php"]]];
-//            [request setHTTPMethod:@"POST"];
-//            [request setValue:postLength forHTTPHeaderField:@"Content-Length"];
-//            [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-//            [request setHTTPBody:postData];
-//        NSURLConnection *conn = [[NSURLConnection alloc]initWithRequest:request delegate:self];
-//    
-//    if(conn) {
-//        NSLog(@"Connection Successful");
-//    } else {
-//        NSLog(@"Connection could not be made");
-//        }
-//    }
         
-        NSString *post = [NSString stringWithFormat:@"&topic=%@&phoneNumber=%@",topicHolder,phoneNumber];
+        NSString *post = [NSString stringWithFormat:@"&topic=%d&email=%@&adderEmail=%@",self.groupID,currentEmail,email];
         NSData *postData = [post dataUsingEncoding:NSASCIIStringEncoding allowLossyConversion:YES];
         NSString *postLength = [NSString stringWithFormat:@"%lu",(unsigned long)[postData length]];
         NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init] ;
@@ -352,10 +335,7 @@ NSString *topicHolder;
             NSLog(@"Connection could not be made");
         }
 
-    
-}
-
-
+    }
 }
 
 

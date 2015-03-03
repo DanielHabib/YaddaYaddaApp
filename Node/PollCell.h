@@ -10,4 +10,6 @@
 
 @interface PollCell : UITableViewCell
 
+@property bool hasVoted;
+
 @end

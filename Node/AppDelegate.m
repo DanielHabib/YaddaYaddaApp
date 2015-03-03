@@ -11,11 +11,6 @@
 @interface AppDelegate()
 
 
-//XMPP ADDITIONS START-----
-- (void)setupStream;
-- (void)goOnline;
-- (void)goOffline;
-//XMPP ADDITTIONS END----
 @end
 
 
@@ -24,27 +19,9 @@
 @implementation AppDelegate
 
 
-#pragma mark - XMPP ADDITIONS START
-- (void)setupStream {
-    xmppStream = [[XMPPStream alloc] init];
-    [xmppStream addDelegate:self delegateQueue:dispatch_get_main_queue()];
-}
-
-//PRESENCE START---------
-- (void)goOnline {
-    XMPPPresence *presence = [XMPPPresence presence];
-    [[self xmppStream] sendElement:presence];
-}
-
-- (void)goOffline {
-    XMPPPresence *presence = [XMPPPresence presenceWithType:@"unavailable"];
-    [[self xmppStream] sendElement:presence];
-}
-//PRESENCE END--------
 
 
 
-#pragma mark - XMPP ADDITIONS END
 
 
 

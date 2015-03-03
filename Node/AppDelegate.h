@@ -7,14 +7,13 @@
 //
 #import <UIKit/UIKit.h>
 
-#import "XMPP.h"
+
 
 
 
 //#import "Globals.h"
 @interface AppDelegate : UIResponder <UIApplicationDelegate>{
-    //XMPP ADDITIONS START-------
-    XMPPStream *xmppStream;
+
     NSString *password;
     BOOL isOpen;
     //XMPP ADDITIONS END-----------
@@ -26,13 +25,6 @@
 //@property UINavigationController *navController;
 
 
-
-//XMPPP ADDITIONS START------------------------------
-@property (nonatomic, readonly) XMPPStream *xmppStream;
-
-- (BOOL)connect;
-- (void)disconnect;
-//XMPP ADDITIONS END------------------------------
 
 
 

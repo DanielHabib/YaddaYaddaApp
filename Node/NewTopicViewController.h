@@ -12,5 +12,7 @@
 @interface NewTopicViewController : UIViewController <UITextFieldDelegate>
 //@property (strong, nonatomic) IBOutlet UITextField *textField;
 @property (strong, nonatomic) IBOutlet UITextField *textField;
+@property (strong, nonatomic) IBOutlet UIBarButtonItem *nextButton;
+- (IBAction)nextButtonAction:(id)sender;
 
 @end

@@ -9,5 +9,9 @@
 #import <Foundation/Foundation.h>
 
 @interface CoreDataComponents : NSObject
+@property NSManagedObjectContext *managedObjectContext;
+@property NSPersistentStoreCoordinator *persistenStoreCoordinator;
+
+@property NSString *testingString;
 
 @end

@@ -17,6 +17,13 @@
 }
 
 //newTopicToTableView
+
+
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [_textField resignFirstResponder];
+    
+}
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -55,11 +62,8 @@
    //[self postTest];
     
     [_textField resignFirstResponder];//hides the keyboard
-    
-    //[self performSegueWithIdentifier:@"newTopicToInvitationPage" sender:self];
-    //[myWorld removeChildrenInArray:@[createdNode]];
-    
-    
+    //[self shouldPerformSegueWithIdentifier:@"textFieldToInvitationPage" sender:self];
+
 }
 
 
@@ -72,11 +76,6 @@
        // NSLog(@"TEXT ::::: : :%@",_textField.text);
         vc.topic = [NSString stringWithFormat:@"%@",[_textField.text stringByReplacingOccurrencesOfString:@" " withString:@"_"]];
     }}
-
-
-
-
-
 
 -(BOOL)isCorrectTypeOfString:(NSString *)stringPlacement{
     
@@ -110,4 +109,7 @@
 
 
 
+- (IBAction)nextButtonAction:(id)sender {
+    [_textField resignFirstResponder];
+}
 @end

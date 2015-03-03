@@ -19,5 +19,5 @@
 @property NSString *topic;
 @property NSMutableArray *addedMembers;
 
-
+@property int groupID;
 @end

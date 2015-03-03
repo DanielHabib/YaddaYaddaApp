@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <FacebookSDK/FacebookSDK.h>
 #import <dispatch/dispatch.h>
-@interface StartUpVC : UIViewController
+@interface StartUpVC : UIViewController<FBLoginViewDelegate,NSXMLParserDelegate>
+
+
+
+
+@property (strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 
 @end

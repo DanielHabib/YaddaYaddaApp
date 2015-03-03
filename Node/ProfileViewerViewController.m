@@ -7,68 +7,107 @@
 //
 
 #import "ProfileViewerViewController.h"
-
+#import "CoreDataAPI.h"
 @interface ProfileViewerViewController ()
 
 @end
 
 @implementation ProfileViewerViewController{
-    NSString * username;
+    NSXMLParser *parser;
+    NSString * username1;
     NSData *imageData;
     NSString *phone;
+    NSString *email;
+    NSMutableDictionary *item;
+    NSMutableString *usernameUpdate;
+    NSString *element;
 }
 
 - (void)viewDidLoad {
     [super viewDidLoad];
 
- 
-    
     _contactsLabel.layer.cornerRadius = 20;
     _contactsLabel.layer.masksToBounds = YES;
     _settingsLabel.layer.cornerRadius = 20;
-     _settingsLabel.layer.masksToBounds = YES;
+    _settingsLabel.layer.masksToBounds = YES;
     
     _grayBackground.layer.cornerRadius = _grayBackground.frame.size.width/2;
     _grayBackground.layer.masksToBounds = YES;
-   // [self.view sendSubviewToBack:_grayBackground];
-    [self.view sendSubviewToBack:_bluebackgound];
-//[self.view bringSubviewToFront:self.]
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    username = [defaults objectForKey:@"username" ];
-    phone = [defaults objectForKey:@"phoneNumber"];
-    self.nameLabel.text  = [NSString stringWithFormat:@"-%@-",username];
-    NSLog(@"testing:::%@",username);
-        imageData = [[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",phone]]];
-    //[self.view bringSubviewToFront:_settingsLabel];
-    //[self.view bringSubviewToFront:_contactsLabel];
-    
-  /*  UITapGestureRecognizer* tapSettings = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(settingsTap)];
-    // if labelView is not set userInteractionEnabled, you must do so
-    [_settingsLabel setUserInteractionEnabled:NO];
-    [_settingsLabel addGestureRecognizer:tapSettings];
-    
-    UITapGestureRecognizer* tapContacts = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(contactsTap)];
-    // if labelView is not set userInteractionEnabled, you must do so
-    [_contactsLabel setUserInteractionEnabled:NO];
-    [_contactsLabel addGestureRecognizer:tapContacts];*/
-    
-                       
-                       
-                       //initWithImage:[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",username]]]]];
-
-
-   // self.customizationCollection.
-    
-
-}
--(void)viewDidAppear:(BOOL)animated{
-   // self.profilePic = [[UIImageView alloc] init];
     self.profilePic.layer.cornerRadius = self.profilePic.frame.size.width/2;
     self.profilePic.layer.masksToBounds = YES;
+    //[self.view sendSubviewToBack:_grayBackground];
+    [self.view sendSubviewToBack:_bluebackgound];
+    //[self.view bringSubviewToFront:self.]
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    username1 = [defaults objectForKey:@"username"];
+    phone = [defaults objectForKey:@"phoneNumber"];
+    email = [defaults objectForKey:@"email"];
+    [self pullInfo];
+    NSLog(@"testing:::%@",username1);
+
+    NSArray *result = [CoreDataAPI fetchProfileInfo];
+
+    
+    ProfileInfo *profInfo = [result objectAtIndex:0];
+    imageData = profInfo.image;
+    if (imageData) {
+    }else{
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_sync(queue, ^{
+            
+            imageData = [[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",email]]];
+            profInfo.image = imageData;
+            [CoreDataAPI updateProfileInformationWithUsername:nil email:nil userID:0 phoneNumber:nil profilePhoto:imageData password:nil];
+        });
+
+    }
     self.profilePic.image = [UIImage imageWithData:imageData];
+    
+    
+
+    
+    
+    [self.username setDelegate:self];
+    UITapGestureRecognizer *singleTap =[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(detectSingleTap:)];
+    [self.view addGestureRecognizer:singleTap];
+}
+
+-(void)pullInfo{
+    
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    ProfileInfo *profInfo = [[CoreDataAPI fetchProfileInfo]objectAtIndex:0];
+
+    self.username.text = profInfo.username;
+    dispatch_async(queue,^{
+        
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/pullUserInfo.php?email=%@",email]];
+    parser=[[NSXMLParser alloc] initWithContentsOfURL:url];
+    [parser setDelegate:self];
+    [parser setShouldResolveExternalEntities:NO];
+    [parser parse];
+      
+        
+        
+    });
+
+
+}
+
+-(void)viewDidAppear:(BOOL)animated{
+    self.profilePic.image = [UIImage imageWithData:imageData];
+    [self setUpObserver];
     [self.view bringSubviewToFront:self.profilePic];
     
 }
+-(void)detectSingleTap:(UITapGestureRecognizer *)tapRec{
+    if ([self.username isFirstResponder]) {
+        
+        [self newUsername];
+        [self.username resignFirstResponder];
+        
+    }
+}
+
 -(void)settingsTap{
     NSLog(@"settings Tapped");
     [self shouldPerformSegueWithIdentifier:@"settings" sender:self];
@@ -118,7 +157,7 @@
     imageData = UIImageJPEGRepresentation(self.profilePic.image, 90);
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     [defaults setObject:imageData forKey:@"profilePhoto"];
-    username = [defaults objectForKey:@"username"];
+    email = [defaults objectForKey:@"email"];
     phone = [defaults objectForKey:@"phoneNumber"];
     [defaults synchronize];
     [self AFPost];
@@ -127,13 +166,11 @@
    
 }
 -(void)AFPost{
-    // username = @"Dan";
-    NSLog(@"USERNAME:::::::%@",username);
-    //username = @"Daniel";
+
     if(imageData){
         NSLog(@"image Data exists");
-        
-        AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@",phone]]];
+        [CoreDataAPI updateProfileInformationWithUsername:nil email:nil userID:0 phoneNumber:nil profilePhoto:imageData password:nil];
+        AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@",email]]];
         manager.responseSerializer = [AFHTTPResponseSerializer serializer];
         //NSData *imageData = UIImageJPEGRepresentation(pickedImage, 0.5);
         NSDictionary *parameters = @{@"message": @"test"};
@@ -146,8 +183,97 @@
             NSLog(@"Error: %@ ***** %@", operation.responseString, error);
         }];
         [op start];
+    }
+}
+
+
+-(BOOL)textFieldShouldReturn:(UITextField *)textField{
+    [self processReturn];
+
+    return YES;
+    
+}
+-(void)newUsername{
+    email = [[NSUserDefaults standardUserDefaults]objectForKey:@"email"];
+    NSString *strURL = [NSString stringWithFormat:@"http://104.131.53.146/updateUsername.php?email=%@&username=%@",email,self.username.text];
+    NSLog(@"Username =>>%@",self.username.text);
+    //[[NSUserDefaults standardUserDefaults]setObject:self.username.text forKey:@"username"];
+    [CoreDataAPI updateProfileInformationWithUsername:self.username.text email:nil userID:0 phoneNumber:nil profilePhoto:nil password:nil];
+    NSData *dataURL = [NSData dataWithContentsOfURL:[NSURL URLWithString:strURL]];
+    NSString *strResult = [[NSString alloc] initWithData:dataURL encoding:NSUTF8StringEncoding];
+    
+}
+-(BOOL)textField:(UITextField *)textedField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string{
+
+   // NSString *newString = [textedField.text stringByReplacingCharactersInRange:range withString:string];
+    //uITextView.text = newString;//edits it live
+    
+    if([self isCorrectTypeOfString:string]){
+        return YES;
         
+    }
+    return YES;
+}
+
+-(void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict {
+    element = elementName;
+    NSLog(@"::::::::%@",element);
+    if ([element isEqualToString:@"User"]) {
+        usernameUpdate = [[NSMutableString alloc]init];
+    }
+}
+
+//define variables to extract info from xml doc
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string {
+    //search for tags
+    if ([element isEqualToString:@"username"]) {
+        [usernameUpdate appendString:string];
+        self.username.text=usernameUpdate;
+        [CoreDataAPI updateProfileInformationWithUsername:usernameUpdate email:nil userID:0 phoneNumber:nil profilePhoto:nil password:nil];
+        [[NSUserDefaults standardUserDefaults]setObject:usernameUpdate forKey:@"username"];
+        NSLog(@"self.username::%@",usernameUpdate);
+    }
+}
+// CLEAN THIS PARSING UP TO FIX THE INCORRECT GROUP MATCHING PROBLEM
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
+    if ([elementName isEqualToString:@"Topics"]) {
+//        this is the questionable part
+//        [item setObject:topic forKey:@"topic"];
+//        [TopicList addObject:[topic copy]];//The problem lies in add objects
+//        [groupIDList addObject:[groupIDUpdate copy]];
         
-        
-    }}
+    }
+}
+- (void)parser:(NSXMLParser *)parser
+parseErrorOccurred:(NSError *)parseError{
+    NSLog(@"parse error");
+    
+}
+
+
+#pragma mark -
+#pragma mark Helpers
+-(void)processReturn{
+    [self.username resignFirstResponder];
+    [self newUsername];
+    [CoreDataAPI updateProfileInformationWithUsername:self.username.text email:nil userID:0 phoneNumber:nil profilePhoto:nil password:nil];
+}
+- (void)setUpObserver
+{
+//    // This could be in an init method.
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardArrived:) name:UIKeyboardDidShowNotification object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardLeft:) name:UIKeyboardDidHideNotification object:nil];
+}
+-(BOOL)isCorrectTypeOfString:(NSString *)stringPlacement{
+    
+    
+    NSCharacterSet* notletters = [[NSCharacterSet letterCharacterSet] invertedSet];
+    
+    if ([stringPlacement rangeOfCharacterFromSet:notletters].location == NSNotFound){
+        return YES;
+    }
+    
+    return NO;
+}
+
 @end

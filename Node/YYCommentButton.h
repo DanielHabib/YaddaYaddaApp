@@ -9,5 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface YYCommentButton : UIButton
-
+@property int unit;
+@property NSMutableString *mainPost;
 @end

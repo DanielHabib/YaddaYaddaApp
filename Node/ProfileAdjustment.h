@@ -9,5 +9,8 @@
 #import <UIKit/UIKit.h>
 
 @interface ProfileAdjustment : UIViewController
+@property (strong, nonatomic) IBOutlet UITextField *phoneInputTextField;
+@property (strong, nonatomic) IBOutlet UIButton *PhoneSync;
+- (IBAction)buttonPressed:(id)sender;
 
 @end

@@ -10,4 +10,13 @@
 
 @interface CoreDataAPI (Fetch)
 
+
+
++(NSArray *)fetchSpecificGroupMemberModelWithUserID:(int)userID;
++(NSArray *)fetchGroupListModel;
++(NSArray *)fetchSpecificGroupModelWithGroupID:(int)groupID;
++(NSArray *)fetchProfileInfoModel;
++(NSArray *)fetchAllEmojiPhotosModel;
++(NSArray *)fetchSpecificEmojiEntitiyModel:(NSString *)emoji;
++(NSArray *)fetchUpdatedGroupMemberListFromServerModel;
 @end

@@ -10,4 +10,8 @@
 
 @interface VotingBallot : UIButton
 
+@property NSString *unit;
+@property int pollID;
+
+
 @end

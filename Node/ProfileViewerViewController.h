@@ -8,7 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ProfileViewerViewController : UIViewController<UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+@interface ProfileViewerViewController : UIViewController<UINavigationControllerDelegate, UIImagePickerControllerDelegate,UITextFieldDelegate,NSXMLParserDelegate>
+@property (strong, nonatomic) IBOutlet UITextField *username;
 @property (strong, nonatomic) IBOutlet UILabel *nameLabel;
 @property (strong, nonatomic) IBOutlet UIImageView *profilePic;
 @property (strong, nonatomic) IBOutlet UILabel *pointsLabel;

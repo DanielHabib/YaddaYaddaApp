@@ -21,6 +21,8 @@
     NSMutableArray *MemberList;
     NSString *element;
     NSMutableString *memberUpdate;
+    NSMutableString *emailUpdate;
+    NSString *email;
     NSMutableString*phoneUpdate;
     NSData *imageDataUpdate;
     dispatch_queue_t queue;
@@ -32,37 +34,26 @@ static NSString * const reuseIdentifier = @"Cell";
 - (void)viewDidLoad {
     checkUnit = 0;
     queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-   // self.view.backgroundColor=[UIColor blueColor];
-    //self.collectionView.backgroundColor=[UIColor blueColor];
-   // [selv.collectionView bringSubviewToFront:self.collectionView.dec
-    
-    dispatch_sync(queue, ^{
-    MemberList = [[NSMutableArray alloc]init];
-    [self runXMLParse];
-        
-        
-    });
 
     
+    dispatch_async(queue, ^{
+    MemberList = [[NSMutableArray alloc]init];
+        [self runXMLParse];
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self.collectionView reloadData];
+        });
+    });
     [super viewDidLoad];
 
     username  = [[NSUserDefaults standardUserDefaults] objectForKey:@"username"];
-    
-    // Uncomment the following line to preserve selection between presentations
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Register cell classes
-    //[self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:reuseIdentifier];
-    
-    // Do any additional setup after loading the view.
+    emailUpdate = [[NSUserDefaults standardUserDefaults]objectForKey:@"email"];
+
     NSLog(@"COUNT:: MEMBERLIST %lu",(unsigned long)[MemberList count]);
     
 }
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
-   // [self runXMLParse];
-    //[self.view reloadInputViews];
-    //[self.collectionView reloadData];
+
 }
 
 - (void)didReceiveMemoryWarning {
@@ -70,15 +61,6 @@ static NSString * const reuseIdentifier = @"Cell";
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
 
 #pragma mark <UICollectionViewDataSource>
 
@@ -123,7 +105,7 @@ static NSString * const reuseIdentifier = @"Cell";
 -(void)runXMLParse{
     //runs the parse
     NSLog(@"topic at collection View:%@",self.topic);
-    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topicMembers.php?topic=%@",self.topic]];
+    NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/topicMembers.php?topic=%d",self.groupID]];
     parser=[[NSXMLParser alloc] initWithContentsOfURL:url];
     [parser setDelegate:self];
     [parser setShouldResolveExternalEntities:NO];
@@ -137,6 +119,7 @@ static NSString * const reuseIdentifier = @"Cell";
         memberUpdate  = [[NSMutableString alloc] init];
         imageDataUpdate = [[NSData alloc]init];
         phoneUpdate = [[NSMutableString alloc]init];
+        emailUpdate = [[NSMutableString alloc]init];
     }
     
 }//define variables to extract info from xml doc
@@ -147,9 +130,9 @@ static NSString * const reuseIdentifier = @"Cell";
         [memberUpdate appendString:string];
 
     }
-   else if ([element isEqualToString:@"phoneNumber"]) {
-        [phoneUpdate appendString:string];
-               imageDataUpdate =[[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",phoneUpdate]]];
+   else if ([element isEqualToString:@"email"]) {
+        [emailUpdate appendString:string];
+               imageDataUpdate =[[NSData alloc]initWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://104.131.53.146/users/%@/profilePic.jpg",emailUpdate]]];
        
    }
 }
@@ -163,7 +146,8 @@ static NSString * const reuseIdentifier = @"Cell";
         
         [item setObject:imageDataUpdate forKey:@"imageData"];
     }
-        [item setObject:phoneUpdate forKey:@"phoneNumber"];
+        [item setObject:emailUpdate forKey:@"email"];
+        //[item setObject:phoneUpdate forKey:@"phoneNumber"];
         [MemberList addObject:[item copy]];//The problem lies in add objects
         NSLog(@"member update ::%@",memberUpdate);
         memberUpdate=[[NSMutableString alloc]init];
@@ -183,41 +167,16 @@ static NSString * const reuseIdentifier = @"Cell";
         
         AddAdditionalMembers *vc = [segue destinationViewController];
         //Fix this to go to the table view
+        vc.groupID = self.groupID;
         vc.topic = [NSString stringWithFormat:@"%@",self.topic];
-        
+
+        vc.memberList = [NSMutableArray arrayWithArray: MemberList];
         
     }
     
     
     
 }
-/*
-// Uncomment this method to specify if the specified item should be highlighted during tracking
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath {
-	return YES;
-}
-*/
 
-/*
-// Uncomment this method to specify if the specified item should be selected
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath {
-    return YES;
-}
-*/
-
-/*
-// Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-- (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath {
-	return NO;
-}
-
-- (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	return NO;
-}
-
-- (void)collectionView:(UICollectionView *)collectionView performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath withSender:(id)sender {
-	
-}
-*/
 
 @end
